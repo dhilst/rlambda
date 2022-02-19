@@ -9,6 +9,7 @@ parser and eval function and some tests
 * Abstraction :  `VAR "=>" expr`, right associative
 * Variable : `VAR`
 * Application `expr expr`, rigth associative
+* Parenthesized expression : `"(" expr ")"`
 * `VAR` : Basically a regex `\w+` 
 
 # Right Associativity
@@ -18,3 +19,8 @@ have right associative application.
 
 * Left associative `f a b c` = `(((f a) b) c)` 
 * Right associative `c b a f` = `(c (b (a f)))`
+
+# Blog post
+
+You may want to take a look on [this](https://dhilst.github.io/2022/02/19/Right-associative-lambda-calculus.html) blog post
+where I explain the motivations behind this.
