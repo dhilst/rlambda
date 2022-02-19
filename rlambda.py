@@ -6,7 +6,6 @@ from collections import namedtuple as t  # type: ignore
 
 var = t("var", "name")
 lamb = t("lamb", "var body")
-appl = t("appl", "e1 e2")
 rappl = t("rappl", "l r")
 
 
@@ -167,7 +166,7 @@ def test_lparser():
         ),
     )
 
-    assert pexpr("1 2 (a => b => a)")[0] == pexpr("1 (2 (a => b => a))")
+    assert pexpr("1 2 (a => b => a)")[0] == pexpr("1 (2 (a => b => a))")[0]
 
 
 def eval_(term, env={}):
@@ -188,6 +187,4 @@ def eval_(term, env={}):
 
 def test_eval():
     assert eval_(pexpr("1 (x => x)")[0]) == "1"
-
-    assert pexpr("1 2 (a => b => a)")[0] == pexpr("1 (2 (a => b => a))")
     assert eval_(pexpr("1 2 (a => b => a)")[0]) == "2"
