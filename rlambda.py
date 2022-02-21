@@ -188,3 +188,65 @@ def eval_(term, env={}):
 def test_eval():
     assert eval_(pexpr("1 (x => x)")[0]) == "1"
     assert eval_(pexpr("1 2 (a => b => a)")[0]) == "2"
+
+
+# De Brujin version
+dbvar = t("dbvar", "index")
+dblamb = t("dblamb", "body")
+dbrappl = t("dbrappl", "l r")
+
+# Terminals
+DBLAMB = pregex(r"/")
+DBINDEX = pregex(r"\d")
+
+
+def dbpexpr(inp):
+    return dbpexpr_1(inp)
+
+
+def dbpexpr_1(inp):
+    return por(dbplamb, dbpexpr_2)(inp)
+
+
+def dbpexpr_2(inp):
+    return por(dbprappl, dbpexpr_3)(inp)
+
+
+def dbpexpr_3(inp):
+    return por(dbpvar, dbpparen)(inp)
+
+
+def dbplamb(inp):
+    (_, body), inp = pand(DBLAMB, dbpexpr)(inp)
+    return dblamb(body), inp
+
+
+def dbpvar(inp):
+    i, inp = DBINDEX(inp)
+    return dbvar(int(i)), inp
+
+
+def dbprappl(inp):
+    e1, inp = dbpexpr_3(inp)
+    e2, inp = dbpexpr(inp)
+    return dbrappl(e1, e2), inp
+
+
+def dbpparen(inp):
+    (_, e, _), inp = pand(LPAR, dbpexpr, RPAR)(inp)
+    return e, inp
+
+
+def test_dbparse():
+    assert dbpexpr("/1") == (dblamb(dbvar(1)), "")
+    assert dbpexpr("(/1)") == (dblamb(dbvar(1)), "")
+    assert dbpexpr("/(/2)") == (dblamb(dblamb(dbvar(2))), "")
+    assert dbpexpr("//2") == (dblamb(dblamb(dbvar(2))), "")
+    assert dbpexpr("9 //2") == (dbrappl(dbvar(9), dblamb(dblamb(dbvar(2)))), "")
+    assert dbpexpr("8 9 //2") == (
+        dbrappl(
+            l=dbvar(index=8),
+            r=dbrappl(l=dbvar(index=9), r=dblamb(body=dblamb(body=dbvar(index=2)))),
+        ),
+        "",
+    )
